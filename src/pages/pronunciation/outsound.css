@@ -155,12 +155,14 @@
   border-color: rgba(168, 204, 224, 0.55);
   background: rgba(168, 204, 224, 0.08);
   color: var(--accent-blue);
-  transform: rotate(45deg);
 }
 .btn-settings svg {
   width: 18px;
   height: 18px;
-  transition: transform 0.4s ease;
+  transition: transform 0.3s ease;
+}
+.btn-settings:hover svg {
+  transform: translateY(-1.5px);
 }
 
 /* ═══════ 본문 3열 + 푸터 ═══════ */
@@ -1075,7 +1077,7 @@
 }
 .full-page-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 6px 14px;
   padding-bottom: clamp(2px, 1vw, 8px);
@@ -1090,6 +1092,32 @@
   font-size: clamp(0.74rem, 1vw, 0.85rem);
   letter-spacing: 0.25em;
   text-transform: uppercase;
+}
+/* 전체 보기 헤더 제일 오른쪽 업로드 버튼 */
+.fp-upload {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(168, 204, 224, 0.1);
+  border: 0.7px solid rgba(168, 204, 224, 0.4);
+  border-radius: 4px;
+  color: var(--accent-blue);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(0.74rem, 0.95vw, 0.84rem);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.fp-upload:hover {
+  background: rgba(168, 204, 224, 0.2);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 12px rgba(168, 204, 224, 0.25);
+}
+.fp-upload .icon {
+  font-size: 1em;
+  line-height: 1;
 }
 
 /* 우측하단 토글 버튼 (게임 ↔ 전체 보기) */
@@ -1181,6 +1209,19 @@
   font-weight: 700;
   letter-spacing: 0.3px;
   white-space: pre;
+}
+/* 재생 위치 표시선 (playhead) — 색이 바뀌는 경계에, 글씨보다 위아래로 길게 */
+.kara-cursor {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: #a8cce0;
+  border-radius: 1px;
+  box-shadow: 0 0 6px rgba(168, 204, 224, 0.85);
+  pointer-events: none;
 }
 .kara-controls {
   display: flex;

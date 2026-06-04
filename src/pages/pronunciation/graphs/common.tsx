@@ -6,7 +6,6 @@ export type GraphStatus = 'loading' | 'ready' | 'error'
 
 export type GraphProps = {
   audioUrl: string
-  onPickFile: () => void
   /** 카드 제목 (기본 "나의 발음"). 전체 보기에서는 그래프 종류로 표시. */
   label?: string
 }
@@ -96,17 +95,30 @@ export function GraphCard({
   playing,
   status,
   onPlayPause,
-  onPickFile,
+  onExport,
   children,
   label = '나의 발음',
 }: {
   playing: boolean
   status: GraphStatus
   onPlayPause: () => void
-  onPickFile: () => void
+  onExport: () => Promise<void>
   children: ReactNode
   label?: string
 }) {
+  const [exporting, setExporting] = useState(false)
+  const handleExport = async () => {
+    if (exporting) return
+    setExporting(true)
+    try {
+      await onExport()
+    } catch (err) {
+      console.error('[graph] export failed', err)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="vis-card">
       <div className="vis-header">
@@ -120,9 +132,14 @@ export function GraphCard({
             <span className="icon">{playing ? '❚❚' : '▶'}</span>
             <span>{playing ? 'Pause' : 'Play'}</span>
           </button>
-          <button className="vis-play" onClick={onPickFile} title="내 음성 파일 올리기">
-            <span className="icon">⏏</span>
-            <span>파일</span>
+          <button
+            className="vis-play"
+            onClick={handleExport}
+            disabled={status !== 'ready' || exporting}
+            title="고해상도 PNG로 내보내기"
+          >
+            <span className="icon">⤓</span>
+            <span>{exporting ? '...' : 'PNG'}</span>
           </button>
         </div>
       </div>

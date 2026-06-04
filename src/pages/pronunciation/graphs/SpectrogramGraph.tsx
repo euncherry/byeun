@@ -3,11 +3,12 @@ import Spectrogram from 'wavesurfer.js/dist/plugins/spectrogram.esm.js'
 import { GraphCard, useWaveSurfer } from './common'
 import type { GraphProps } from './common'
 import { ROSEUS_COLORMAP } from './roseus'
+import { exportGraphPng } from './exportPng'
 
 // 원본 drawSpectrogram(SpectrogramPlugin) 와 동일 설정:
 // FFT 512 · Hann · Mel 스케일 · roseus 컬러맵 · gain 25 / range 80.
 // 파형 자체는 숨기고(투명·height 0) 스펙트로그램 캔버스만 노출.
-export default function SpectrogramGraph({ audioUrl, onPickFile, label }: GraphProps) {
+export default function SpectrogramGraph({ audioUrl, label }: GraphProps) {
   const specRef = useRef<HTMLDivElement>(null)
 
   const { containerRef, playing, status, togglePlay } = useWaveSurfer(audioUrl, () => ({
@@ -41,7 +42,7 @@ export default function SpectrogramGraph({ audioUrl, onPickFile, label }: GraphP
       playing={playing}
       status={status}
       onPlayPause={togglePlay}
-      onPickFile={onPickFile}
+      onExport={() => exportGraphPng('spectrogram', audioUrl)}
       label={label}
     >
       <div ref={containerRef} className="ws-host hidden-ws" />

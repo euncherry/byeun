@@ -2,10 +2,11 @@ import { useRef } from 'react'
 import { GraphCard, useWaveSurfer } from './common'
 import type { GraphProps } from './common'
 import { detectPitch, drawPitchContour } from './pitch'
+import { exportGraphPng } from './exportPng'
 
 // 원본 initPitchWaveform + processPitch(drawPitchContour) 와 동일:
 // 배경 파형(cream-muted 0.3 / accent-blue 0.5) 위에 피치 곡선 오버레이.
-export default function PitchGraph({ audioUrl, onPickFile, label }: GraphProps) {
+export default function PitchGraph({ audioUrl, label }: GraphProps) {
   const overlayRef = useRef<HTMLCanvasElement>(null)
 
   const { containerRef, playing, status, togglePlay } = useWaveSurfer(
@@ -33,7 +34,7 @@ export default function PitchGraph({ audioUrl, onPickFile, label }: GraphProps) 
       playing={playing}
       status={status}
       onPlayPause={togglePlay}
-      onPickFile={onPickFile}
+      onExport={() => exportGraphPng('pitch', audioUrl)}
       label={label}
     >
       <div className="pitch-host">
