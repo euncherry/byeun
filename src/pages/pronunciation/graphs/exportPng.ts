@@ -82,13 +82,17 @@ function drawPitchHiRes(
   if (!baseFrequency || baseFrequency <= 0) return
   const n = frequencies.length || 1
   const sx = width / n
-  const pointSize = Math.max(2, Math.round(width / 640))
+  // 점 두께(세로) + 길이(가로). 길이를 점 간격(sx)만큼 빼서 점들이 끊기지 않고
+  // 이어진 선처럼 보이게 한다. 더 길게 원하면 DOT_LEN_MULT를 키우면 됨.
+  const DOT_LEN_MULT = 1.6 // 점 가로 길이 배수 (간격 대비)
+  const dotThickness = Math.max(2, Math.round(width / 600))
+  const dotLength = Math.max(dotThickness, Math.ceil(sx * DOT_LEN_MULT))
   let prevY = 0
   frequencies.forEach((f, i) => {
     if (!f) return
     const y = Math.round(height - (f / (baseFrequency * 2)) * height)
     ctx.fillStyle = y > prevY ? downColor : upColor
-    ctx.fillRect(Math.round(i * sx), y, pointSize, pointSize)
+    ctx.fillRect(Math.round(i * sx), y, dotLength, dotThickness)
     prevY = y
   })
 }
