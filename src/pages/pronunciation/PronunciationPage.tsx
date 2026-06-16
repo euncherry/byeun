@@ -7,6 +7,9 @@ import PitchGraph from './graphs/PitchGraph'
 import SpectrogramGraph from './graphs/SpectrogramGraph'
 import { DEFAULT_AUDIO_URL } from './graphs/audio'
 import Karaoke from './karaoke/Karaoke'
+import { ColorEditor } from './ColorEditor'
+import { loadColors, saveColors } from './graphs/colors'
+import type { GraphColors } from './graphs/colors'
 
 /* ── 탭 정의 ── */
 const TABS = [
@@ -120,6 +123,13 @@ export default function PronunciationPage() {
 
   // 전체 페이지 보기 토글 (게임 UI ↔ 그래프 세로 스택)
   const [fullView, setFullView] = useState(false)
+
+  // 그래프 색상 (localStorage 저장 → 게임 탭/전체 보기 + 새로고침 공유)
+  const [colors, setColors] = useState<GraphColors>(() => loadColors())
+  const [showColors, setShowColors] = useState(false)
+  useEffect(() => {
+    saveColors(colors)
+  }, [colors])
 
   const selectTab = (id: TabId) => {
     setTab(id)
@@ -368,7 +378,7 @@ export default function PronunciationPage() {
                   </div>
 
                   {tab === 'pitch' && (
-                    <PitchGraph audioUrl={audioUrl} />
+                    <PitchGraph audioUrl={audioUrl} colors={colors} />
                   )}
 
                   <div className="info-card">
@@ -404,7 +414,7 @@ export default function PronunciationPage() {
                   </div>
 
                   {tab === 'waveform' && (
-                    <WaveformGraph audioUrl={audioUrl} />
+                    <WaveformGraph audioUrl={audioUrl} colors={colors} />
                   )}
 
                   <div className="info-card">
@@ -454,16 +464,28 @@ export default function PronunciationPage() {
             <div className="full-page-head">
               <span className="crumb accent">발음 분석</span>
               <span className="full-page-sub">파형 · 음정 · 스펙트로그램</span>
-              <button className="fp-upload" onClick={pickFile} title="음성 파일 업로드">
-                <span className="icon">⏏</span>
-                <span>음성 파일</span>
-              </button>
+              <div className="full-page-actions">
+                <button
+                  className={showColors ? 'fp-upload active' : 'fp-upload'}
+                  onClick={() => setShowColors((v) => !v)}
+                  title="그래프 색상 편집"
+                >
+                  <span className="icon">🎨</span>
+                  <span>색상</span>
+                </button>
+                <button className="fp-upload" onClick={pickFile} title="음성 파일 업로드">
+                  <span className="icon">⏏</span>
+                  <span>음성 파일</span>
+                </button>
+              </div>
             </div>
+
+            {showColors && <ColorEditor colors={colors} setColors={setColors} />}
 
             <Karaoke audioUrl={audioUrl} />
 
-            <WaveformGraph audioUrl={audioUrl} label="파형 곡선" />
-            <PitchGraph audioUrl={audioUrl} label="음정 곡선" />
+            <WaveformGraph audioUrl={audioUrl} colors={colors} label="파형 곡선" />
+            <PitchGraph audioUrl={audioUrl} colors={colors} label="음정 곡선" />
             <SpectrogramGraph audioUrl={audioUrl} label="스펙트로그램" />
           </div>
         </div>

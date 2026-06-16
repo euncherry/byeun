@@ -87,7 +87,7 @@ export function useWaveSurfer(
     }
   }
 
-  return { containerRef, playing, status, togglePlay }
+  return { containerRef, wsRef, playing, status, togglePlay }
 }
 
 /** "나의 발음" 카드 — 헤더(재생/파일 버튼) + 그래프 영역 + 상태 표시 */

@@ -1,15 +1,21 @@
+import { useEffect } from 'react'
 import { GraphCard, useWaveSurfer } from './common'
 import type { GraphProps } from './common'
 import { exportGraphPng } from './exportPng'
+import type { GraphColors } from './colors'
 
-// 원본 initWaveform("waveform-user", "rgb(181,169,143)", "rgb(168,204,224)") 와 동일
-export default function WaveformGraph({ audioUrl, label }: GraphProps) {
-  const { containerRef, playing, status, togglePlay } = useWaveSurfer(audioUrl, () => ({
+// 원본 initWaveform 와 동일 + 색상은 props 로 받아 런타임 편집
+export default function WaveformGraph({
+  audioUrl,
+  label,
+  colors,
+}: GraphProps & { colors: GraphColors }) {
+  const { containerRef, wsRef, playing, status, togglePlay } = useWaveSurfer(audioUrl, () => ({
     height: 100,
     sampleRate: 8000,
-    waveColor: 'rgb(181, 169, 143)',
-    progressColor: 'rgb(168, 204, 224)',
-    cursorColor: 'rgb(168, 204, 224)',
+    waveColor: colors.waveformWave,
+    progressColor: colors.waveformProgress,
+    cursorColor: colors.waveformProgress,
     barWidth: 2,
     barGap: 1,
     barRadius: 2,
@@ -17,12 +23,21 @@ export default function WaveformGraph({ audioUrl, label }: GraphProps) {
     normalize: true,
   }))
 
+  // 색상 변경 즉시 반영 (재디코드 없이 setOptions)
+  useEffect(() => {
+    wsRef.current?.setOptions({
+      waveColor: colors.waveformWave,
+      progressColor: colors.waveformProgress,
+      cursorColor: colors.waveformProgress,
+    })
+  }, [colors.waveformWave, colors.waveformProgress, wsRef])
+
   return (
     <GraphCard
       playing={playing}
       status={status}
       onPlayPause={togglePlay}
-      onExport={() => exportGraphPng('waveform', audioUrl)}
+      onExport={() => exportGraphPng('waveform', audioUrl, colors)}
       label={label}
     >
       <div ref={containerRef} className="ws-host" />

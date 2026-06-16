@@ -121,6 +121,8 @@ export function drawPitchContour(
   canvas: HTMLCanvasElement,
   frequencies: (number | null)[],
   baseFrequency: number,
+  pitchUpColor = '#a8cce0', // 상승 — accent-blue
+  pitchDownColor = '#d4a574', // 하강 — amber (score-low)
 ) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
@@ -136,8 +138,6 @@ export function drawPitchContour(
   ctx.clearRect(0, 0, width, height)
   if (!baseFrequency || baseFrequency <= 0) return
 
-  const pitchUpColor = '#a8cce0' // 상승 — accent-blue
-  const pitchDownColor = '#d4a574' // 하강 — amber (score-low)
   const pointSize = 2
   let prevY = 0
 

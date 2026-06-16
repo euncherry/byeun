@@ -1095,7 +1095,6 @@
 }
 /* 전체 보기 헤더 제일 오른쪽 업로드 버튼 */
 .fp-upload {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1118,6 +1117,66 @@
 .fp-upload .icon {
   font-size: 1em;
   line-height: 1;
+}
+.full-page-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fp-upload.active {
+  background: rgba(168, 204, 224, 0.22);
+  border-color: var(--accent-blue);
+}
+
+/* ═══════ 그래프 색상 편집기 ═══════ */
+.color-editor {
+  background: rgba(26, 21, 16, 0.5);
+  border: 0.7px solid rgba(232, 221, 200, 0.15);
+  border-radius: 8px;
+  padding: clamp(14px, 2vw, 20px) clamp(16px, 2.2vw, 24px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: clamp(18px, 3vw, 36px);
+}
+.color-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.color-group-title {
+  font-size: clamp(0.74rem, 0.95vw, 0.84rem);
+  font-weight: 600;
+  color: var(--cream);
+  letter-spacing: 0.06em;
+}
+.color-swatches {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.color-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--cream-muted);
+  cursor: pointer;
+}
+.color-field input[type='color'] {
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border: 0.7px solid rgba(232, 221, 200, 0.25);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.color-reset {
+  margin-left: auto;
+  align-self: center;
 }
 
 /* 우측하단 토글 버튼 (게임 ↔ 전체 보기) */

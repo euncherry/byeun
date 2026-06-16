@@ -5,11 +5,19 @@ import WaveSurfer from 'wavesurfer.js'
 import Spectrogram from 'wavesurfer.js/dist/plugins/spectrogram.esm.js'
 import { ROSEUS_COLORMAP } from './roseus'
 import { detectPitch } from './pitch'
+import { DEFAULT_COLORS, withAlpha } from './colors'
+import type { GraphColors } from './colors'
 
 export type GraphKind = 'waveform' | 'pitch' | 'spectrogram'
 
-const EXPORT_WIDTH = 1920 // 기준 가로 해상도 (DPR 곱해져 실제론 더 큼)
-const EXPORT_HEIGHT = 320
+// ⚠️ 비율(PX_PER_SEC : GRAPH_HEIGHT)은 앱 src/features/pronunciation/utils/graphLayout.ts와
+//    반드시 일치해야 함 — 앱이 PNG 종횡비로 px/초를 역산한다. RENDER는 선명도용 배율(종횡비 불변).
+const PX_PER_SEC = 220
+const GRAPH_HEIGHT = 100
+const RENDER = 2
+const PXPS = PX_PER_SEC * RENDER // minPxPerSec — 그래프 폭 = duration × 이 값
+const EXPORT_HEIGHT = GRAPH_HEIGHT * RENDER // 그래프 높이(px)
+const HOST_WIDTH = 8000 // 오프스크린 호스트 폭 — 긴 클립도 단일 캔버스로 export
 // 배경은 투명(PNG 알파)으로 둠. 다크 배경이 필요하면 아래에서 ctx 로 칠하면 됩니다.
 // (스펙트로그램은 컬러맵이 전 픽셀을 채우는 불투명 이미지라 투명이 적용되지 않음)
 
@@ -17,7 +25,7 @@ function makeHost(): HTMLDivElement {
   const host = document.createElement('div')
   host.style.cssText =
     'position:fixed;left:-100000px;top:0;pointer-events:none;opacity:0;width:' +
-    EXPORT_WIDTH +
+    HOST_WIDTH +
     'px;'
   document.body.appendChild(host)
   return host
@@ -68,10 +76,10 @@ function drawPitchHiRes(
   height: number,
   frequencies: (number | null)[],
   baseFrequency: number,
+  upColor = '#a8cce0',
+  downColor = '#d4a574',
 ) {
   if (!baseFrequency || baseFrequency <= 0) return
-  const upColor = '#a8cce0'
-  const downColor = '#d4a574'
   const n = frequencies.length || 1
   const sx = width / n
   const pointSize = Math.max(2, Math.round(width / 640))
@@ -85,7 +93,11 @@ function drawPitchHiRes(
   })
 }
 
-export async function exportGraphPng(kind: GraphKind, audioUrl: string): Promise<void> {
+export async function exportGraphPng(
+  kind: GraphKind,
+  audioUrl: string,
+  colors: GraphColors = DEFAULT_COLORS,
+): Promise<void> {
   const host = makeHost()
   let ws: WaveSurfer | undefined
   try {
@@ -98,8 +110,10 @@ export async function exportGraphPng(kind: GraphKind, audioUrl: string): Promise
         container: host,
         height: EXPORT_HEIGHT,
         sampleRate: 8000,
-        waveColor: 'rgb(181, 169, 143)',
-        progressColor: 'rgb(181, 169, 143)',
+        minPxPerSec: PXPS,
+        fillParent: false,
+        waveColor: colors.waveformWave,
+        progressColor: colors.waveformWave,
         cursorColor: 'rgba(0, 0, 0, 0)',
         barWidth: 2,
         barGap: 1,
@@ -120,8 +134,10 @@ export async function exportGraphPng(kind: GraphKind, audioUrl: string): Promise
         container: host,
         height: EXPORT_HEIGHT,
         sampleRate: 8000,
-        waveColor: 'rgba(181, 169, 143, 0.3)',
-        progressColor: 'rgba(181, 169, 143, 0.3)',
+        minPxPerSec: PXPS,
+        fillParent: false,
+        waveColor: withAlpha(colors.pitchBgWave, 0.3),
+        progressColor: withAlpha(colors.pitchBgWave, 0.3),
         cursorColor: 'rgba(0, 0, 0, 0)',
         interact: false,
         normalize: true,
@@ -136,7 +152,15 @@ export async function exportGraphPng(kind: GraphKind, audioUrl: string): Promise
       ctx.drawImage(img, 0, 0) // 흐린 배경 파형
       if (buffer) {
         const { frequencies, baseFrequency } = detectPitch(buffer)
-        drawPitchHiRes(ctx, out.width, out.height, frequencies, baseFrequency)
+        drawPitchHiRes(
+          ctx,
+          out.width,
+          out.height,
+          frequencies,
+          baseFrequency,
+          colors.pitchUp,
+          colors.pitchDown,
+        )
       }
       await downloadCanvas(out, 'pitch.png')
     } else {
@@ -160,6 +184,8 @@ export async function exportGraphPng(kind: GraphKind, audioUrl: string): Promise
         container: host,
         height: 1,
         sampleRate: 8000,
+        minPxPerSec: PXPS,
+        fillParent: false,
         waveColor: 'rgba(0, 0, 0, 0)',
         progressColor: 'rgba(0, 0, 0, 0)',
         cursorColor: 'rgba(0, 0, 0, 0)',
@@ -184,7 +210,7 @@ export async function exportGraphPng(kind: GraphKind, audioUrl: string): Promise
       const canvases = (
         Array.from(specHost.querySelectorAll('canvas')) as HTMLCanvasElement[]
       ).filter((c) => c.width > 0 && c.height > 0)
-      const w = canvases.length ? Math.max(...canvases.map((c) => c.width)) : EXPORT_WIDTH
+      const w = canvases.length ? Math.max(...canvases.map((c) => c.width)) : HOST_WIDTH
       const h = canvases.length ? Math.max(...canvases.map((c) => c.height)) : EXPORT_HEIGHT
       out.width = w
       out.height = h
